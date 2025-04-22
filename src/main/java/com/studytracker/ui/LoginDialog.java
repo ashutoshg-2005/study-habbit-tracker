@@ -26,40 +26,34 @@ public class LoginDialog {
      */
     public User showLoginDialog() {
         JDialog loginDialog = new JDialog((Frame)null, "Study Habit Tracker - Login", true);
+        loginDialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         loginDialog.setLayout(new BorderLayout());
-        loginDialog.setSize(400, 350);
-        loginDialog.setLocationRelativeTo(null);
         
         // Set dialog background color
-        JPanel mainPanel = new JPanel(new BorderLayout());
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
         mainPanel.setBackground(UIConstants.LIGHT_BG);
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         
         // Create title panel
-        JPanel titlePanel = new JPanel(new BorderLayout());
+        JPanel titlePanel = new JPanel();
+        titlePanel.setLayout(new BoxLayout(titlePanel, BoxLayout.X_AXIS));
         titlePanel.setBackground(UIConstants.PRIMARY_COLOR);
         titlePanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        titlePanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        titlePanel.setMaximumSize(new Dimension(Short.MAX_VALUE, 70));
         
         JLabel titleLabel = new JLabel("Study Habit Tracker");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
         titleLabel.setForeground(Color.WHITE);
-        titlePanel.add(titleLabel, BorderLayout.CENTER);
-        
-        // Add a small icon/logo if available
-        try {
-            Icon appIcon = UIUtils.createIcon("study", 32);
-            JLabel iconLabel = new JLabel(appIcon);
-            titlePanel.add(iconLabel, BorderLayout.WEST);
-            titlePanel.add(Box.createHorizontalStrut(10), BorderLayout.CENTER);
-            titlePanel.add(titleLabel, BorderLayout.EAST);
-        } catch (Exception e) {
-            titlePanel.add(titleLabel, BorderLayout.CENTER);
-        }
+        titlePanel.add(titleLabel);
         
         // Welcome message panel
         JPanel welcomePanel = new JPanel();
         welcomePanel.setBackground(Color.WHITE);
-        welcomePanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        welcomePanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 5, 10));
+        welcomePanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        welcomePanel.setMaximumSize(new Dimension(Short.MAX_VALUE, 60));
         
         JLabel welcomeLabel = new JLabel(
             "<html><div style='text-align: center;'>" +
@@ -70,139 +64,162 @@ public class LoginDialog {
         welcomeLabel.setFont(new Font("Arial", Font.PLAIN, 12));
         welcomePanel.add(welcomeLabel);
         
+        // Create the tabbed pane with login and register tabs
         JTabbedPane loginTabs = new JTabbedPane();
         loginTabs.setFont(new Font("Arial", Font.BOLD, 12));
-        
-        // Add icons to tabs
-        Icon loginIcon = UIUtils.createIcon("user", 16);
-        Icon registerIcon = UIUtils.createIcon("add-user", 16);
+        loginTabs.setAlignmentX(Component.CENTER_ALIGNMENT);
         
         // Login panel
-        JPanel loginPanel = new JPanel(new GridBagLayout());
-        loginPanel.setBackground(Color.WHITE);
-        loginPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        
-        JTextField usernameField = new JTextField(20);
-        usernameField.setPreferredSize(new Dimension(usernameField.getPreferredSize().width, 30));
-        
-        JPasswordField passwordField = new JPasswordField(20);
-        passwordField.setPreferredSize(new Dimension(passwordField.getPreferredSize().width, 30));
-        
-        JButton loginButton = UIUtils.createStyledButton("Login", Color.WHITE, UIConstants.ACCENT_COLOR);
-        
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        loginPanel.add(new JLabel("Username:"), gbc);
-        
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        loginPanel.add(usernameField, gbc);
-        
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        loginPanel.add(new JLabel("Password:"), gbc);
-        
-        gbc.gridx = 0;
-        gbc.gridy = 3;
-        loginPanel.add(passwordField, gbc);
-        
-        gbc.gridx = 0;
-        gbc.gridy = 4;
-        gbc.insets = new Insets(20, 5, 5, 5);
-        loginPanel.add(loginButton, gbc);
+        JPanel loginPanel = createLoginPanel();
         
         // Register panel
-        JPanel registerPanel = new JPanel(new GridBagLayout());
-        registerPanel.setBackground(Color.WHITE);
-        registerPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        JPanel registerPanel = createRegisterPanel();
         
-        GridBagConstraints rgbc = new GridBagConstraints();
-        rgbc.insets = new Insets(5, 5, 5, 5);
-        rgbc.fill = GridBagConstraints.HORIZONTAL;
+        loginTabs.addTab("Login", loginPanel);
+        loginTabs.addTab("Register", registerPanel);
         
-        JTextField regUsernameField = new JTextField(20);
-        regUsernameField.setPreferredSize(new Dimension(regUsernameField.getPreferredSize().width, 30));
-        
-        JPasswordField regPasswordField = new JPasswordField(20);
-        regPasswordField.setPreferredSize(new Dimension(regPasswordField.getPreferredSize().width, 30));
-        
-        JTextField regEmailField = new JTextField(20);
-        regEmailField.setPreferredSize(new Dimension(regEmailField.getPreferredSize().width, 30));
-        
-        JTextField regFullNameField = new JTextField(20);
-        regFullNameField.setPreferredSize(new Dimension(regFullNameField.getPreferredSize().width, 30));
-        
-        JButton registerButton = UIUtils.createStyledButton("Register", Color.WHITE, UIConstants.ACCENT_COLOR);
-        
-        rgbc.gridx = 0;
-        rgbc.gridy = 0;
-        registerPanel.add(new JLabel("Username:"), rgbc);
-        
-        rgbc.gridx = 0;
-        rgbc.gridy = 1;
-        registerPanel.add(regUsernameField, rgbc);
-        
-        rgbc.gridx = 0;
-        rgbc.gridy = 2;
-        registerPanel.add(new JLabel("Password:"), rgbc);
-        
-        rgbc.gridx = 0;
-        rgbc.gridy = 3;
-        registerPanel.add(regPasswordField, rgbc);
-        
-        rgbc.gridx = 0;
-        rgbc.gridy = 4;
-        registerPanel.add(new JLabel("Email:"), rgbc);
-        
-        rgbc.gridx = 0;
-        rgbc.gridy = 5;
-        registerPanel.add(regEmailField, rgbc);
-        
-        rgbc.gridx = 0;
-        rgbc.gridy = 6;
-        registerPanel.add(new JLabel("Full Name:"), rgbc);
-        
-        rgbc.gridx = 0;
-        rgbc.gridy = 7;
-        registerPanel.add(regFullNameField, rgbc);
-        
-        rgbc.gridx = 0;
-        rgbc.gridy = 8;
-        rgbc.insets = new Insets(20, 5, 5, 5);
-        registerPanel.add(registerButton, rgbc);
-        
-        loginTabs.addTab("Login", loginIcon, loginPanel);
-        loginTabs.addTab("Register", registerIcon, registerPanel);
-        
-        mainPanel.add(titlePanel, BorderLayout.NORTH);
-        mainPanel.add(welcomePanel, BorderLayout.CENTER);
-        mainPanel.add(loginTabs, BorderLayout.SOUTH);
+        // Add components to the main panel
+        mainPanel.add(titlePanel);
+        mainPanel.add(Box.createVerticalStrut(5));
+        mainPanel.add(welcomePanel);
+        mainPanel.add(Box.createVerticalStrut(5));
+        mainPanel.add(loginTabs);
         
         loginDialog.add(mainPanel);
         
-        final boolean[] success = {false};
+        // Pack the dialog to ensure proper sizing based on components
+        loginDialog.pack();
+        
+        // Set minimum size to prevent components from being cut off
+        loginDialog.setMinimumSize(new Dimension(350, 450));
+        
+        // Set the dialog's location to center of screen
+        loginDialog.setLocationRelativeTo(null);
+        
+        // Make it visible
+        loginDialog.setVisible(true);
+        
+        return currentUser;
+    }
+    
+    private JPanel createLoginPanel() {
+        JPanel loginPanel = new JPanel();
+        loginPanel.setLayout(new BoxLayout(loginPanel, BoxLayout.Y_AXIS));
+        loginPanel.setBackground(Color.WHITE);
+        loginPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        
+        // Username field
+        JLabel usernameLabel = new JLabel("Username:");
+        usernameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
+        JTextField usernameField = new JTextField(20);
+        usernameField.setMaximumSize(new Dimension(Short.MAX_VALUE, 30));
+        usernameField.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
+        // Password field
+        JLabel passwordLabel = new JLabel("Password:");
+        passwordLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
+        JPasswordField passwordField = new JPasswordField(20);
+        passwordField.setMaximumSize(new Dimension(Short.MAX_VALUE, 30));
+        passwordField.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
+        // Login button
+        JButton loginButton = UIUtils.createStyledButton("Login", Color.WHITE, UIConstants.ACCENT_COLOR);
+        loginButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
+        // Add components to panel with spacing
+        loginPanel.add(usernameLabel);
+        loginPanel.add(Box.createVerticalStrut(5));
+        loginPanel.add(usernameField);
+        loginPanel.add(Box.createVerticalStrut(15));
+        loginPanel.add(passwordLabel);
+        loginPanel.add(Box.createVerticalStrut(5));
+        loginPanel.add(passwordField);
+        loginPanel.add(Box.createVerticalStrut(20));
+        loginPanel.add(loginButton);
         
         loginButton.addActionListener(e -> {
             String username = usernameField.getText();
             String password = new String(passwordField.getPassword());
             
             if (username.isEmpty() || password.isEmpty()) {
-                UIUtils.showError(loginDialog, "Please enter both username and password!");
+                UIUtils.showError(loginButton, "Please enter both username and password!");
                 return;
             }
             
             if (dbManager.login(username, password)) {
                 currentUser = dbManager.getCurrentUser();
-                success[0] = true;
-                loginDialog.dispose();
+                Window window = SwingUtilities.getWindowAncestor(loginButton);
+                window.dispose();
             } else {
-                UIUtils.showError(loginDialog, "Invalid username or password!");
+                UIUtils.showError(loginButton, "Invalid username or password!");
             }
         });
+        
+        return loginPanel;
+    }
+    
+    private JPanel createRegisterPanel() {
+        JPanel registerPanel = new JPanel();
+        registerPanel.setLayout(new BoxLayout(registerPanel, BoxLayout.Y_AXIS));
+        registerPanel.setBackground(Color.WHITE);
+        registerPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        
+        // Username field
+        JLabel usernameLabel = new JLabel("Username:");
+        usernameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
+        JTextField regUsernameField = new JTextField(20);
+        regUsernameField.setMaximumSize(new Dimension(Short.MAX_VALUE, 30));
+        regUsernameField.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
+        // Password field
+        JLabel passwordLabel = new JLabel("Password:");
+        passwordLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
+        JPasswordField regPasswordField = new JPasswordField(20);
+        regPasswordField.setMaximumSize(new Dimension(Short.MAX_VALUE, 30));
+        regPasswordField.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
+        // Email field
+        JLabel emailLabel = new JLabel("Email:");
+        emailLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
+        JTextField regEmailField = new JTextField(20);
+        regEmailField.setMaximumSize(new Dimension(Short.MAX_VALUE, 30));
+        regEmailField.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
+        // Full name field
+        JLabel fullNameLabel = new JLabel("Full Name:");
+        fullNameLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
+        JTextField regFullNameField = new JTextField(20);
+        regFullNameField.setMaximumSize(new Dimension(Short.MAX_VALUE, 30));
+        regFullNameField.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
+        // Register button
+        JButton registerButton = UIUtils.createStyledButton("Register", Color.WHITE, UIConstants.ACCENT_COLOR);
+        registerButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
+        // Add components to panel with spacing
+        registerPanel.add(usernameLabel);
+        registerPanel.add(Box.createVerticalStrut(5));
+        registerPanel.add(regUsernameField);
+        registerPanel.add(Box.createVerticalStrut(10));
+        registerPanel.add(passwordLabel);
+        registerPanel.add(Box.createVerticalStrut(5));
+        registerPanel.add(regPasswordField);
+        registerPanel.add(Box.createVerticalStrut(10));
+        registerPanel.add(emailLabel);
+        registerPanel.add(Box.createVerticalStrut(5));
+        registerPanel.add(regEmailField);
+        registerPanel.add(Box.createVerticalStrut(10));
+        registerPanel.add(fullNameLabel);
+        registerPanel.add(Box.createVerticalStrut(5));
+        registerPanel.add(regFullNameField);
+        registerPanel.add(Box.createVerticalStrut(15));
+        registerPanel.add(registerButton);
         
         registerButton.addActionListener(e -> {
             String username = regUsernameField.getText();
@@ -211,15 +228,23 @@ public class LoginDialog {
             String fullName = regFullNameField.getText();
             
             if (username.isEmpty() || password.isEmpty() || email.isEmpty() || fullName.isEmpty()) {
-                UIUtils.showError(loginDialog, "All fields are required!");
+                UIUtils.showError(registerButton, "All fields are required!");
                 return;
             }
             
             User newUser = new User(username, password, email, fullName);
             
             if (dbManager.registerUser(newUser)) {
-                UIUtils.showInfo(loginDialog, "Registration successful! Please login.");
-                loginTabs.setSelectedIndex(0); // Switch to login tab
+                UIUtils.showInfo(registerButton, "Registration successful! Please login.");
+                
+                // Get the parent tabbed pane and switch to login tab
+                Component comp = registerButton.getParent();
+                while (comp != null && !(comp instanceof JTabbedPane)) {
+                    comp = comp.getParent();
+                }
+                if (comp != null) {
+                    ((JTabbedPane) comp).setSelectedIndex(0); // Switch to login tab
+                }
                 
                 // Clear registration fields
                 regUsernameField.setText("");
@@ -227,11 +252,10 @@ public class LoginDialog {
                 regEmailField.setText("");
                 regFullNameField.setText("");
             } else {
-                UIUtils.showError(loginDialog, "Registration failed! Username or email might already exist.");
+                UIUtils.showError(registerButton, "Registration failed! Username or email might already exist.");
             }
         });
         
-        loginDialog.setVisible(true);
-        return currentUser;
+        return registerPanel;
     }
 }

@@ -27,6 +27,7 @@ public class StatisticsPanel extends JPanel {
     private JComboBox<String> timeRangeCombo;
     private JComboBox<String> chartTypeCombo;
     private JPanel summaryPanel;
+    private JSplitPane statsSplitPane;
     
     // Animation variables
     private javax.swing.Timer animationTimer;
@@ -53,6 +54,16 @@ public class StatisticsPanel extends JPanel {
         setupUI();
         setupAnimation();
         refreshData();
+        
+        // Add component listener to adjust split pane divider location when panel resizes
+        addComponentListener(new java.awt.event.ComponentAdapter() {
+            public void componentResized(java.awt.event.ComponentEvent e) {
+                // Adjust divider location proportionally when the panel is resized
+                SwingUtilities.invokeLater(() -> {
+                    statsSplitPane.setDividerLocation(0.65);
+                });
+            }
+        });
     }
     
     private void setupUI() {
@@ -74,16 +85,26 @@ public class StatisticsPanel extends JPanel {
         summaryPanel.add(summaryContent, BorderLayout.CENTER);
         
         // Add panels to stats tab
-        JPanel upperPanel = new JPanel(new BorderLayout());
+        JPanel upperPanel = new JPanel(new BorderLayout(5, 5));
         upperPanel.setBackground(Color.WHITE);
         upperPanel.add(controlsPanel, BorderLayout.NORTH);
         upperPanel.add(chartPanel, BorderLayout.CENTER);
         
-        JSplitPane statsSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, upperPanel, summaryPanel);
-        statsSplitPane.setDividerLocation(400);
-        statsSplitPane.setOneTouchExpandable(true);
+        // Make chart panel expand to fill available space
+        chartPanel.setPreferredSize(new Dimension(600, 400));
         
-        add(statsSplitPane, BorderLayout.CENTER);
+        statsSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, upperPanel, summaryPanel);
+        statsSplitPane.setResizeWeight(0.65); // Give 65% of space to chart panel
+        statsSplitPane.setOneTouchExpandable(true);
+        statsSplitPane.setContinuousLayout(true);
+        
+        // Add scrollable panel for better handling of small window sizes
+        JScrollPane scrollPane = new JScrollPane(statsSplitPane);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        
+        add(scrollPane, BorderLayout.CENTER);
     }
     
     private void setupAnimation() {
@@ -113,12 +134,14 @@ public class StatisticsPanel extends JPanel {
         timeRangeCombo = new JComboBox<>(new String[]{
             "This Week", "Last Week", "This Month", "Last Month", "Last 3 Months", "This Year"
         });
+        timeRangeCombo.setPreferredSize(new Dimension(130, UIConstants.INPUT_HEIGHT));
         
         // Chart type selector
         JLabel chartTypeLabel = new JLabel("Chart Type:");
         chartTypeCombo = new JComboBox<>(new String[]{
             "Bar Chart", "Pie Chart", "Line Chart"
         });
+        chartTypeCombo.setPreferredSize(new Dimension(130, UIConstants.INPUT_HEIGHT));
         
         // Update button
         JButton updateButton = UIUtils.createStyledButton("Update", Color.WHITE, UIConstants.ACCENT_COLOR);
@@ -127,11 +150,33 @@ public class StatisticsPanel extends JPanel {
             refreshData();
         });
         
-        controlsPanel.add(timeRangeLabel);
-        controlsPanel.add(timeRangeCombo);
-        controlsPanel.add(chartTypeLabel);
-        controlsPanel.add(chartTypeCombo);
-        controlsPanel.add(updateButton);
+        // Use a panel with GridBagLayout for responsive control positioning
+        JPanel innerControlsPanel = new JPanel(new GridBagLayout());
+        innerControlsPanel.setBackground(Color.WHITE);
+        
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 10);
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.NONE;
+        
+        gbc.gridx = 0; gbc.gridy = 0;
+        innerControlsPanel.add(timeRangeLabel, gbc);
+        
+        gbc.gridx = 1; gbc.gridy = 0;
+        innerControlsPanel.add(timeRangeCombo, gbc);
+        
+        gbc.gridx = 2; gbc.gridy = 0;
+        innerControlsPanel.add(chartTypeLabel, gbc);
+        
+        gbc.gridx = 3; gbc.gridy = 0;
+        innerControlsPanel.add(chartTypeCombo, gbc);
+        
+        gbc.gridx = 4; gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.EAST;
+        gbc.weightx = 1.0;
+        innerControlsPanel.add(updateButton, gbc);
+        
+        controlsPanel.add(innerControlsPanel);
         
         return controlsPanel;
     }
@@ -235,9 +280,14 @@ public class StatisticsPanel extends JPanel {
                     drawTooltip(g2d, currentTooltip, tooltipPoint.x, tooltipPoint.y);
                 }
             }
+            
+            @Override
+            public Dimension getPreferredSize() {
+                // Ensure chart has a reasonable minimum size
+                return new Dimension(600, 400);
+            }
         };
         
-        chartPanel.setPreferredSize(new Dimension(600, 300));
         chartPanel.setBackground(Color.WHITE);
         
         // Add mouse listeners for tooltips

@@ -134,11 +134,7 @@ public class MainWindow {
             } else if (selectedIndex == 2) {
                 statsPanel.refreshData();
             }
-            // else if (selectedIndex == 4) {
-            //     // when user switches to calendar tab
-            //     calendarPanel.fetchStudyDates();
-            //     calendarPanel.repaint();
-            // }
+            
         });
     }
     
