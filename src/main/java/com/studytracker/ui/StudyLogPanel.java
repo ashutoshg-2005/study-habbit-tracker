@@ -30,6 +30,7 @@ public class StudyLogPanel extends JPanel {
     private JDateChooser dateChooser;
     private DefaultTableModel logTableModel;
     private JTable logTable;
+    private JSplitPane splitPane;
     
     public StudyLogPanel(DatabaseManager dbManager, User currentUser) {
         this.dbManager = dbManager;
@@ -56,18 +57,32 @@ public class StudyLogPanel extends JPanel {
         JPanel tablePanel = createTablePanel();
         
         // Create split pane for input and table
-        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, inputPanel, tablePanel);
-        splitPane.setDividerLocation(250);
+        splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, inputPanel, tablePanel);
+        splitPane.setResizeWeight(0.35); // Give 35% of space to top component
         splitPane.setOneTouchExpandable(true);
+        splitPane.setContinuousLayout(true);
         
         // Add to the main panel
         add(splitPane, BorderLayout.CENTER);
+        
+        // Add component listener to adjust split pane divider location when panel resizes
+        addComponentListener(new java.awt.event.ComponentAdapter() {
+            public void componentResized(java.awt.event.ComponentEvent e) {
+                // Adjust divider location proportionally when the panel is resized
+                SwingUtilities.invokeLater(() -> {
+                    splitPane.setDividerLocation(0.35);
+                });
+            }
+        });
     }
     
     private JPanel createInputPanel() {
-        JPanel inputPanel = new JPanel(new GridBagLayout());
+        JPanel inputPanel = new JPanel(new BorderLayout());
         inputPanel.setBorder(BorderFactory.createTitledBorder("Add Study Session"));
         inputPanel.setBackground(Color.WHITE);
+        
+        JPanel formPanel = new JPanel(new GridBagLayout());
+        formPanel.setBackground(Color.WHITE);
         
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(
@@ -82,40 +97,41 @@ public class StudyLogPanel extends JPanel {
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.anchor = GridBagConstraints.WEST;
-        inputPanel.add(new JLabel("Subject:"), gbc);
+        gbc.weightx = 0.0;
+        formPanel.add(new JLabel("Subject:"), gbc);
         
         subjectField = new JTextField(20);
         gbc.gridx = 1;
         gbc.weightx = 1.0;
-        inputPanel.add(subjectField, gbc);
+        formPanel.add(subjectField, gbc);
         
         // Hours field
         gbc.gridx = 0;
         gbc.gridy = 1;
-        gbc.weightx = 0;
-        inputPanel.add(new JLabel("Hours:"), gbc);
+        gbc.weightx = 0.0;
+        formPanel.add(new JLabel("Hours:"), gbc);
         
         hoursField = new JTextField(5);
         gbc.gridx = 1;
         gbc.weightx = 1.0;
-        inputPanel.add(hoursField, gbc);
+        formPanel.add(hoursField, gbc);
         
         // Date field
         gbc.gridx = 0;
         gbc.gridy = 2;
-        gbc.weightx = 0;
-        inputPanel.add(new JLabel("Date:"), gbc);
+        gbc.weightx = 0.0;
+        formPanel.add(new JLabel("Date:"), gbc);
         
         dateChooser = UIUtils.createDateChooser(new Date(System.currentTimeMillis()));
         gbc.gridx = 1;
         gbc.weightx = 1.0;
-        inputPanel.add(dateChooser, gbc);
+        formPanel.add(dateChooser, gbc);
         
         // Notes field
         gbc.gridx = 0;
         gbc.gridy = 3;
-        gbc.weightx = 0;
-        inputPanel.add(new JLabel("Notes:"), gbc);
+        gbc.weightx = 0.0;
+        formPanel.add(new JLabel("Notes:"), gbc);
         
         notesField = new JTextArea(3, 20);
         notesField.setLineWrap(true);
@@ -123,15 +139,16 @@ public class StudyLogPanel extends JPanel {
         JScrollPane notesScroll = new JScrollPane(notesField);
         gbc.gridx = 1;
         gbc.weightx = 1.0;
-        inputPanel.add(notesScroll, gbc);
+        formPanel.add(notesScroll, gbc);
+        
+        inputPanel.add(formPanel, BorderLayout.CENTER);
         
         // Save button
         JButton saveButton = UIUtils.createStyledButton("Save Session", Color.WHITE, UIConstants.ACCENT_COLOR);
-        gbc.gridx = 0;
-        gbc.gridy = 4;
-        gbc.gridwidth = 2;
-        gbc.anchor = GridBagConstraints.CENTER;
-        inputPanel.add(saveButton, gbc);
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        buttonPanel.setBackground(Color.WHITE);
+        buttonPanel.add(saveButton);
+        inputPanel.add(buttonPanel, BorderLayout.SOUTH);
         
         saveButton.addActionListener(e -> saveStudyLog());
         
@@ -139,7 +156,7 @@ public class StudyLogPanel extends JPanel {
     }
     
     private JPanel createTablePanel() {
-        JPanel tablePanel = new JPanel(new BorderLayout());
+        JPanel tablePanel = new JPanel(new BorderLayout(5, 5));
         tablePanel.setBorder(BorderFactory.createTitledBorder("Study History"));
         tablePanel.setBackground(Color.WHITE);
         
@@ -156,11 +173,12 @@ public class StudyLogPanel extends JPanel {
         logTable.setFont(new Font("Arial", Font.PLAIN, UIConstants.FONT_SMALL));
         logTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, UIConstants.FONT_SMALL));
         logTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        logTable.setFillsViewportHeight(true);
         logTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
         
-        // Set preferred column widths
-        logTable.getColumnModel().getColumn(0).setPreferredWidth(120); // Subject
-        logTable.getColumnModel().getColumn(1).setPreferredWidth(60);  // Hours
+        // Set relative column widths
+        logTable.getColumnModel().getColumn(0).setPreferredWidth(100); // Subject
+        logTable.getColumnModel().getColumn(1).setPreferredWidth(50);  // Hours
         logTable.getColumnModel().getColumn(2).setPreferredWidth(100); // Date
         logTable.getColumnModel().getColumn(3).setPreferredWidth(200); // Notes
         
@@ -178,6 +196,7 @@ public class StudyLogPanel extends JPanel {
         });
         
         JScrollPane scrollPane = new JScrollPane(logTable);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         tablePanel.add(scrollPane, BorderLayout.CENTER);
         
         // Add button toolbar for table actions

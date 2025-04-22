@@ -27,6 +27,7 @@ public class StudyGoalsPanel extends JPanel {
     private DefaultTableModel goalTableModel;
     private JTable goalTable;
     private JPanel goalProgressPanel;
+    private JSplitPane mainSplitPane;
     
     public StudyGoalsPanel(DatabaseManager dbManager, User currentUser) {
         this.dbManager = dbManager;
@@ -56,24 +57,50 @@ public class StudyGoalsPanel extends JPanel {
         goalProgressPanel = createProgressPanel();
         
         // Create main content panel
-        JPanel contentPanel = new JPanel(new BorderLayout());
+        JPanel contentPanel = new JPanel(new BorderLayout(5, 5));
+        contentPanel.setBackground(Color.WHITE);
         
         // Create split pane for input and table
-        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, inputPanel, tablePanel);
-        splitPane.setDividerLocation(200);
-        splitPane.setOneTouchExpandable(true);
+        mainSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, inputPanel, tablePanel);
+        mainSplitPane.setResizeWeight(0.25); // Give 25% of space to input panel
+        mainSplitPane.setOneTouchExpandable(true);
+        mainSplitPane.setContinuousLayout(true);
         
-        contentPanel.add(splitPane, BorderLayout.CENTER);
-        contentPanel.add(goalProgressPanel, BorderLayout.SOUTH);
+        contentPanel.add(mainSplitPane, BorderLayout.CENTER);
+        
+        // Create a scroll pane for the progress panel to handle overflow
+        JScrollPane progressScrollPane = new JScrollPane(goalProgressPanel);
+        progressScrollPane.setBorder(BorderFactory.createEmptyBorder());
+        progressScrollPane.setPreferredSize(new Dimension(getWidth(), 200));
+        
+        // Create a split pane for the main content and progress panel
+        JSplitPane vertSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, contentPanel, progressScrollPane);
+        vertSplitPane.setResizeWeight(0.7); // Give 70% of space to main content
+        vertSplitPane.setOneTouchExpandable(true);
+        vertSplitPane.setContinuousLayout(true);
         
         // Add to the main panel
-        add(contentPanel, BorderLayout.CENTER);
+        add(vertSplitPane, BorderLayout.CENTER);
+        
+        // Add component listener to adjust split pane divider location when panel resizes
+        addComponentListener(new java.awt.event.ComponentAdapter() {
+            public void componentResized(java.awt.event.ComponentEvent e) {
+                // Adjust divider locations proportionally when the panel is resized
+                SwingUtilities.invokeLater(() -> {
+                    mainSplitPane.setDividerLocation(0.25);
+                    vertSplitPane.setDividerLocation(0.7);
+                });
+            }
+        });
     }
     
     private JPanel createInputPanel() {
-        JPanel goalInputPanel = new JPanel(new GridBagLayout());
+        JPanel goalInputPanel = new JPanel(new BorderLayout(5, 5));
         goalInputPanel.setBorder(BorderFactory.createTitledBorder("Add Study Goal"));
         goalInputPanel.setBackground(Color.WHITE);
+        
+        JPanel formPanel = new JPanel(new GridBagLayout());
+        formPanel.setBackground(Color.WHITE);
         
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(
@@ -88,42 +115,44 @@ public class StudyGoalsPanel extends JPanel {
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.anchor = GridBagConstraints.WEST;
-        goalInputPanel.add(new JLabel("Subject:"), gbc);
+        gbc.weightx = 0.0;
+        formPanel.add(new JLabel("Subject:"), gbc);
         
         goalSubjectField = new JTextField(20);
         gbc.gridx = 1;
         gbc.weightx = 1.0;
-        goalInputPanel.add(goalSubjectField, gbc);
+        formPanel.add(goalSubjectField, gbc);
         
         // Target hours field
         gbc.gridx = 0;
         gbc.gridy = 1;
-        gbc.weightx = 0;
-        goalInputPanel.add(new JLabel("Target Hours:"), gbc);
+        gbc.weightx = 0.0;
+        formPanel.add(new JLabel("Target Hours:"), gbc);
         
         targetHoursField = new JTextField(5);
         gbc.gridx = 1;
         gbc.weightx = 1.0;
-        goalInputPanel.add(targetHoursField, gbc);
+        formPanel.add(targetHoursField, gbc);
         
         // Period type combo
         gbc.gridx = 0;
         gbc.gridy = 2;
-        gbc.weightx = 0;
-        goalInputPanel.add(new JLabel("Period:"), gbc);
+        gbc.weightx = 0.0;
+        formPanel.add(new JLabel("Period:"), gbc);
         
         periodTypeCombo = new JComboBox<>(new String[]{"Daily", "Weekly", "Monthly"});
         gbc.gridx = 1;
         gbc.weightx = 1.0;
-        goalInputPanel.add(periodTypeCombo, gbc);
+        formPanel.add(periodTypeCombo, gbc);
+        
+        goalInputPanel.add(formPanel, BorderLayout.CENTER);
         
         // Save button
         JButton saveGoalButton = UIUtils.createStyledButton("Save Goal", Color.WHITE, UIConstants.ACCENT_COLOR);
-        gbc.gridx = 0;
-        gbc.gridy = 3;
-        gbc.gridwidth = 2;
-        gbc.anchor = GridBagConstraints.CENTER;
-        goalInputPanel.add(saveGoalButton, gbc);
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        buttonPanel.setBackground(Color.WHITE);
+        buttonPanel.add(saveGoalButton);
+        goalInputPanel.add(buttonPanel, BorderLayout.SOUTH);
         
         saveGoalButton.addActionListener(e -> saveStudyGoal());
         
@@ -131,7 +160,7 @@ public class StudyGoalsPanel extends JPanel {
     }
     
     private JPanel createTablePanel() {
-        JPanel tablePanel = new JPanel(new BorderLayout());
+        JPanel tablePanel = new JPanel(new BorderLayout(5, 5));
         tablePanel.setBorder(BorderFactory.createTitledBorder("Current Goals"));
         tablePanel.setBackground(Color.WHITE);
         
@@ -154,6 +183,8 @@ public class StudyGoalsPanel extends JPanel {
         goalTable.setRowHeight(UIConstants.TABLE_ROW_HEIGHT);
         goalTable.setFont(new Font("Arial", Font.PLAIN, UIConstants.FONT_SMALL));
         goalTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, UIConstants.FONT_SMALL));
+        goalTable.setFillsViewportHeight(true);
+        goalTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         
         // Set custom rendering for active column
         goalTable.getColumnModel().getColumn(3).setCellRenderer(new DefaultTableCellRenderer() {
@@ -180,6 +211,7 @@ public class StudyGoalsPanel extends JPanel {
         goalTable.getColumnModel().getColumn(3).setPreferredWidth(60);   // Active
         
         JScrollPane goalScrollPane = new JScrollPane(goalTable);
+        goalScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         tablePanel.add(goalScrollPane, BorderLayout.CENTER);
         
         // Add button toolbar for goal actions

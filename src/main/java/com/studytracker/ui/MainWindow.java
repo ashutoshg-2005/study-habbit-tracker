@@ -32,9 +32,8 @@ public class MainWindow {
     private void initialize() {
         // Create and set up the main window
         mainFrame = new JFrame("Study Habit Tracker - " + currentUser.getFullName());
-        mainFrame.setSize(950, 700);
         mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        mainFrame.setLayout(new BorderLayout());
+        mainFrame.setLayout(new BorderLayout(5, 5));
         mainFrame.getContentPane().setBackground(UIConstants.LIGHT_BG);
         
         // Create header panel with welcome message and user info
@@ -55,8 +54,11 @@ public class MainWindow {
         // Create tabs
         createTabs();
         
-        // Add tabbed pane to frame
-        mainFrame.add(tabbedPane, BorderLayout.CENTER);
+        // Add tabbed pane to frame with proper sizing constraints
+        JPanel contentPanel = new JPanel(new BorderLayout());
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 5));
+        contentPanel.add(tabbedPane, BorderLayout.CENTER);
+        mainFrame.add(contentPanel, BorderLayout.CENTER);
         
         // Create status bar
         JPanel statusBar = createStatusBar();
@@ -64,7 +66,7 @@ public class MainWindow {
     }
     
     private JPanel createHeaderPanel() {
-        JPanel headerPanel = new JPanel(new BorderLayout());
+        JPanel headerPanel = new JPanel(new BorderLayout(10, 0));
         headerPanel.setBackground(UIConstants.PRIMARY_COLOR);
         headerPanel.setBorder(new EmptyBorder(
             UIConstants.PADDING_MEDIUM, 
@@ -98,22 +100,17 @@ public class MainWindow {
     }
     
     private void createTabs() {
-        // Create icon objects for tabs
-        Icon logIcon = UIUtils.createIcon("calendar", 16);
-        Icon goalIcon = UIUtils.createIcon("target", 16);
-        Icon statsIcon = UIUtils.createIcon("chart", 16);
-    
         // Create Study Log tab
         logPanel = new StudyLogPanel(dbManager, currentUser);
-        tabbedPane.addTab("Study Log", logIcon, logPanel, "Record your study sessions");
+        tabbedPane.addTab("Study Log", logPanel);
         
         // Create Study Goals tab
         goalsPanel = new StudyGoalsPanel(dbManager, currentUser);
-        tabbedPane.addTab("Study Goals", goalIcon, goalsPanel, "Set and track your study goals");
+        tabbedPane.addTab("Study Goals", goalsPanel);
         
         // Create Statistics tab
         statsPanel = new StatisticsPanel(dbManager, currentUser);
-        tabbedPane.addTab("Statistics", statsIcon, statsPanel, "View your study statistics");
+        tabbedPane.addTab("Statistics", statsPanel);
         
         // Add change listener to refresh data when switching tabs
         tabbedPane.addChangeListener(e -> {
@@ -166,9 +163,19 @@ public class MainWindow {
      * Shows the main window
      */
     public void show() {
-        mainFrame.pack(); // Ensure components are properly sized before displaying
-        mainFrame.setSize(950, 700); // Set the preferred size
-        mainFrame.setLocationRelativeTo(null); // Center on screen
+        // Set minimum size to ensure components are always visible
+        mainFrame.setMinimumSize(new Dimension(800, 600));
+        
+        // Use preferred size based on component layout
+        mainFrame.pack();
+        
+        // Set a reasonable starting size that fits all components
+        mainFrame.setSize(1000, 700);
+        
+        // Center on screen
+        mainFrame.setLocationRelativeTo(null);
+        
+        // Make it visible
         mainFrame.setVisible(true);
     }
 }
