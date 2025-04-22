@@ -1,10 +1,13 @@
 package com.studytracker.model;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Handles database operations for the Study Habit Tracker application
@@ -14,7 +17,7 @@ public class DatabaseManager {
     private Connection connection;
     private static final String DB_URL = "jdbc:mysql://localhost:3306/study_tracker";
     private static final String DB_USER = "root"; 
-    private static final String DB_PASSWORD = "1234"; 
+    private static final String DB_PASSWORD = "157056724"; 
     
     // Current logged-in user
     private User currentUser;
@@ -87,6 +90,38 @@ public class DatabaseManager {
             return false;
         }
     }
+
+
+    public void logStudySession(int userId, LocalDate date) {
+        String query = "INSERT INTO study_logs (user_id, subject, hours, date, notes) VALUES (?, ?, ?, ?, ?)";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setInt(1, userId);
+            stmt.setString(2, "General"); // default subject
+            stmt.setDouble(3, 1.0);      // default 1 hour
+            stmt.setDate(4, java.sql.Date.valueOf(date));
+            stmt.setString(5, "Auto-logged via 'Started Studying'");
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public Set<LocalDate> getStudyDates(int userId) {
+        Set<LocalDate> dates = new HashSet<>();
+        String query = "SELECT date FROM study_logs WHERE user_id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setInt(1, userId);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                dates.add(rs.getDate("date").toLocalDate());
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return dates;
+    }
+    
+
     
     /**
      * Adds a new study log entry for the current user

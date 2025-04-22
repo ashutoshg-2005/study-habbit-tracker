@@ -22,6 +22,8 @@ public class MainWindow {
     private StudyLogPanel logPanel;
     private StudyGoalsPanel goalsPanel;
     private StatisticsPanel statsPanel;
+    private PomodoroPanel pomodoroPanel;
+    private StudyCalendarPanel calendarPanel;
     
     public MainWindow(DatabaseManager dbManager, User currentUser) {
         this.dbManager = dbManager;
@@ -114,6 +116,13 @@ public class MainWindow {
         // Create Statistics tab
         statsPanel = new StatisticsPanel(dbManager, currentUser);
         tabbedPane.addTab("Statistics", statsIcon, statsPanel, "View your study statistics");
+
+        pomodoroPanel = new PomodoroPanel();
+        tabbedPane.addTab("Pomodoro Timer", statsIcon, pomodoroPanel, "Enhance your studies with Pomodoro Timer");
+
+        // Study Calendar tab — use the already‑logged‑in dbManager + currentUser
+        calendarPanel = new StudyCalendarPanel(currentUser.getId(), dbManager);
+        tabbedPane.addTab("Study Calendar", UIUtils.createIcon("grid", 16),calendarPanel, "Consistency Graph");
         
         // Add change listener to refresh data when switching tabs
         tabbedPane.addChangeListener(e -> {
@@ -125,6 +134,11 @@ public class MainWindow {
             } else if (selectedIndex == 2) {
                 statsPanel.refreshData();
             }
+            // else if (selectedIndex == 4) {
+            //     // when user switches to calendar tab
+            //     calendarPanel.fetchStudyDates();
+            //     calendarPanel.repaint();
+            // }
         });
     }
     
