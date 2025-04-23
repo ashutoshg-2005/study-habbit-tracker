@@ -24,6 +24,7 @@ public class MainWindow {
     private StatisticsPanel statsPanel;
     private PomodoroPanel pomodoroPanel;
     private StudyCalendarPanel calendarPanel;
+    private MotivationQuotePanel motivationPanel;
     
     public MainWindow(DatabaseManager dbManager, User currentUser) {
         this.dbManager = dbManager;
@@ -119,6 +120,9 @@ public class MainWindow {
         // Create Study Calendar tab
         calendarPanel = new StudyCalendarPanel(currentUser.getId(), dbManager);
         tabbedPane.addTab("Study Calendar", calendarPanel);
+
+        motivationPanel = new MotivationQuotePanel();
+        tabbedPane.addTab("Motivation Quote Window", motivationPanel);
         
         // Add change listener to refresh data when switching tabs
         tabbedPane.addChangeListener(e -> {

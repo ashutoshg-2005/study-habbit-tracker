@@ -17,7 +17,7 @@ public class DatabaseManager {
     private Connection connection;
     private static final String DB_URL = "jdbc:mysql://localhost:3306/study_tracker";
     private static final String DB_USER = "root"; 
-    private static final String DB_PASSWORD = "1234"; 
+    private static final String DB_PASSWORD = "157056724"; 
     
     // Current logged-in user
     private User currentUser;
