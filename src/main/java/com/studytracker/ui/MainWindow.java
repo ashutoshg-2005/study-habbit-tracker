@@ -121,6 +121,8 @@ public class MainWindow {
         // Create Study Calendar tab
         calendarPanel = new StudyCalendarPanel(currentUser.getId(), dbManager);
         tabbedPane.addTab("Study Calendar", calendarPanel);
+
+        
         
         // Create Motivation Quotes tab
         motivationPanel = new MotivationQuotePanel();
