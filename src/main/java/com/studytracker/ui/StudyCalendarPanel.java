@@ -94,4 +94,12 @@ public class StudyCalendarPanel extends JPanel {
         revalidate();
         repaint();
     }
+    
+    /**
+     * Public method to refresh data from the database and update the calendar
+     */
+    public void refreshData() {
+        fetchStudyDates();
+        refreshCalendar();
+    }
 }

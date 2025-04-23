@@ -24,6 +24,8 @@ public class MainWindow {
     private StatisticsPanel statsPanel;
     private PomodoroPanel pomodoroPanel;
     private StudyCalendarPanel calendarPanel;
+    private ChatbotPanel chatbotPanel;
+    private MotivationQuotePanel motivationPanel;
     
     public MainWindow(DatabaseManager dbManager, User currentUser) {
         this.dbManager = dbManager;
@@ -120,6 +122,14 @@ public class MainWindow {
         calendarPanel = new StudyCalendarPanel(currentUser.getId(), dbManager);
         tabbedPane.addTab("Study Calendar", calendarPanel);
         
+        // Create Motivation Quotes tab
+        motivationPanel = new MotivationQuotePanel();
+        tabbedPane.addTab("Motivation", motivationPanel);
+        
+        // Create Chatbot Assistant tab
+        chatbotPanel = new ChatbotPanel(dbManager, currentUser);
+        tabbedPane.addTab("Study Assistant", chatbotPanel);
+        
         // Add change listener to refresh data when switching tabs
         tabbedPane.addChangeListener(e -> {
             int selectedIndex = tabbedPane.getSelectedIndex();
@@ -129,6 +139,12 @@ public class MainWindow {
                 goalsPanel.refreshData();
             } else if (selectedIndex == 2) {
                 statsPanel.refreshData();
+            } else if (selectedIndex == 4) {
+                calendarPanel.refreshData();
+            } else if (selectedIndex == 5) {
+                motivationPanel.refreshData();
+            } else if (selectedIndex == 6) {
+                chatbotPanel.refreshData();
             }
         });
     }
@@ -154,6 +170,12 @@ public class MainWindow {
         mainFrame.dispose();
         
         // Clean up resources
+        if (chatbotPanel != null) {
+            chatbotPanel.cleanup();
+        }
+        if (motivationPanel != null) {
+            motivationPanel.cleanup();
+        }
         dbManager.close();
         
         // Start a new instance of the application

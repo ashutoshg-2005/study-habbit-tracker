@@ -36,6 +36,18 @@ public class DatabaseManager {
     }
     
     /**
+     * Get a connection to the database
+     * @return A connection object
+     * @throws SQLException if connection fails
+     */
+    private Connection getConnection() throws SQLException {
+        if (connection == null || connection.isClosed()) {
+            connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+        }
+        return connection;
+    }
+    
+    /**
      * Validates user credentials and sets the current user if valid
      */
     public boolean login(String username, String password) {
@@ -425,6 +437,56 @@ public class DatabaseManager {
         }
         
         return 0.0;
+    }
+    
+    /**
+     * Get the total count of study sessions for a user
+     * @param userId The user ID
+     * @return Count of study logs
+     */
+    public int getStudyLogCount(int userId) {
+        int count = 0;
+        String query = "SELECT COUNT(*) FROM study_logs WHERE user_id = ?";
+        
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            
+            stmt.setInt(1, userId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    count = rs.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return count;
+    }
+    
+    /**
+     * Get the total study hours for a user
+     * @param userId The user ID
+     * @return Total hours studied
+     */
+    public double getTotalStudyHours(int userId) {
+        double hours = 0.0;
+        String query = "SELECT SUM(hours) FROM study_logs WHERE user_id = ?";
+        
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            
+            stmt.setInt(1, userId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    hours = rs.getDouble(1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return hours;
     }
     
     /**
