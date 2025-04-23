@@ -10,6 +10,7 @@ import java.util.Set;
 
 public class StudyCalendarPanel extends JPanel {
     private final JButton startButton;
+    private final JButton refreshButton;
     private final JPanel calendarGrid;
     private final int userId;
     private final DatabaseManager db;
@@ -22,7 +23,10 @@ public class StudyCalendarPanel extends JPanel {
 
         setLayout(new BorderLayout());
 
-        // “Started Studying” button
+        // Control panel for buttons
+        JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+
+        // "Started Studying" button
         startButton = new JButton("Started Studying");
         startButton.addActionListener(e -> {
             LocalDate today = LocalDate.now();
@@ -30,10 +34,22 @@ public class StudyCalendarPanel extends JPanel {
             studyDates.add(today);
             refreshCalendar();
         });
+        
+        // "Refresh Calendar" button
+        refreshButton = new JButton("Refresh Calendar");
+        refreshButton.addActionListener(e -> {
+            fetchStudyDates();
+            refreshCalendar();
+            JOptionPane.showMessageDialog(this, "Calendar refreshed successfully!", 
+                                          "Refresh", JOptionPane.INFORMATION_MESSAGE);
+        });
+
+        controlPanel.add(startButton);
+        controlPanel.add(refreshButton);
 
         // calendar grid (7 columns for Sun→Sat)
         calendarGrid = new JPanel(new GridLayout(0, 7));
-        add(startButton, BorderLayout.NORTH);
+        add(controlPanel, BorderLayout.NORTH);
         add(calendarGrid, BorderLayout.CENTER);
 
         fetchStudyDates();

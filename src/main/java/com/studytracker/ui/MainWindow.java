@@ -100,29 +100,25 @@ public class MainWindow {
     }
     
     private void createTabs() {
-        // Create icon objects for tabs
-        Icon logIcon = UIUtils.createIcon("calendar", 16);
-        Icon goalIcon = UIUtils.createIcon("target", 16);
-        Icon statsIcon = UIUtils.createIcon("chart", 16);
-    
         // Create Study Log tab
         logPanel = new StudyLogPanel(dbManager, currentUser);
-        tabbedPane.addTab("Study Log", logIcon, logPanel, "Record your study sessions");
+        tabbedPane.addTab("Study Log", logPanel);
         
         // Create Study Goals tab
         goalsPanel = new StudyGoalsPanel(dbManager, currentUser);
-        tabbedPane.addTab("Study Goals", goalIcon, goalsPanel, "Set and track your study goals");
+        tabbedPane.addTab("Study Goals", goalsPanel);
         
         // Create Statistics tab
         statsPanel = new StatisticsPanel(dbManager, currentUser);
-        tabbedPane.addTab("Statistics", statsIcon, statsPanel, "View your study statistics");
+        tabbedPane.addTab("Statistics", statsPanel);
 
+        // Create Pomodoro Timer tab
         pomodoroPanel = new PomodoroPanel();
-        tabbedPane.addTab("Pomodoro Timer", statsIcon, pomodoroPanel, "Enhance your studies with Pomodoro Timer");
+        tabbedPane.addTab("Pomodoro Timer", pomodoroPanel);
 
-        // Study Calendar tab — use the already‑logged‑in dbManager + currentUser
+        // Create Study Calendar tab
         calendarPanel = new StudyCalendarPanel(currentUser.getId(), dbManager);
-        tabbedPane.addTab("Study Calendar", UIUtils.createIcon("grid", 16),calendarPanel, "Consistency Graph");
+        tabbedPane.addTab("Study Calendar", calendarPanel);
         
         // Add change listener to refresh data when switching tabs
         tabbedPane.addChangeListener(e -> {
@@ -134,7 +130,6 @@ public class MainWindow {
             } else if (selectedIndex == 2) {
                 statsPanel.refreshData();
             }
-            
         });
     }
     
